@@ -1,0 +1,12 @@
+{
+  "name": "hscode-zapier",
+  "version": "0.1.0",
+  "description": "Zapier integration for hscode.info: classify products into EU customs CN codes, look up codes.",
+  "license": "MIT",
+  "main": "index.js",
+  "private": true,
+  "scripts": { "test": "node --test test/app.test.js", "validate": "zapier validate" },
+  "engines": { "node": ">=18" },
+  "dependencies": { "zapier-platform-core": "19.2.1" },
+  "devDependencies": { "nock": "^13.5.0", "zapier-platform-cli": "19.2.1" }
+}
