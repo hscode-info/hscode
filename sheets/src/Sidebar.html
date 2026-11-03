@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<style>
+	body { font: 13px/1.4 Arial, sans-serif; margin: 12px; color: #202124; }
+	input { width: 100%; box-sizing: border-box; padding: 6px; margin: 6px 0; }
+	button { padding: 6px 10px; margin-right: 6px; }
+	#status { margin: 8px 0; }
+	#msg { margin-top: 10px; min-height: 2em; }
+	.err { color: #b00020; }
+	small { color: #5f6368; }
+</style>
+</head>
+<body>
+	<p>Paste your hscode.info API key. It is stored in your Google account for this script and never written into the sheet.</p>
+	<p><small>Get a key at <a href="https://hscode.info/en/account" target="_blank">hscode.info/en/account</a>.</small></p>
+	<div id="status">Checking...</div>
+	<input id="key" type="password" autocomplete="off" placeholder="API key">
+	<button id="save">Save</button>
+	<button id="test">Test</button>
+	<button id="clear">Remove</button>
+	<div id="msg"></div>
+	<script>
+		var $ = function (id) { return document.getElementById(id); };
+		function show(text, isError) {
+			$('msg').textContent = text;
+			$('msg').className = isError ? 'err' : '';
+		}
+		function status(s) {
+			$('status').textContent = s.set ? 'A key is saved (' + s.hint + ').' : 'No key saved.';
+		}
+		function call(name, args, done) {
+			show('Working...');
+			var r = google.script.run
+				.withSuccessHandler(done)
+				.withFailureHandler(function (e) { show(e.message, true); });
+			r[name].apply(r, args || []);
+		}
+		$('save').onclick = function () {
+			call('saveApiKey', [$('key').value], function (s) { $('key').value = ''; status(s); show('Saved.'); });
+		};
+		$('clear').onclick = function () {
+			call('clearApiKey', [], function (s) { status(s); show('Removed.'); });
+		};
+		$('test').onclick = function () {
+			call('testApiKey', [], function (m) { show(m, m !== 'Key works.'); });
+		};
+		call('getKeyStatus', [], function (s) { status(s); show(''); });
+	</script>
+</body>
+</html>

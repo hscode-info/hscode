@@ -1,0 +1,6 @@
+{
+  "name": "hscode-sheets",
+  "private": true,
+  "license": "MIT",
+  "scripts": { "test": "node --test test/*.test.js" }
+}

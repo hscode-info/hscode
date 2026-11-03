@@ -1,0 +1,321 @@
+/*
+ * hscode.info spreadsheet core: pure logic, no I/O.
+ * Request building, response parsing, batching, cache keys, duty selection.
+ * Runs in Google Apps Script (global HsCore), browsers (global HsCore) and Node (module.exports).
+ * The Excel add-in ships a byte-identical copy of this file (see excel/build.mjs).
+ */
+var HsCore = (function () {
+	'use strict';
+
+	const API_BASE = 'https://hscode.info/api/v1';
+	const MAX_BATCH = 25;
+	const CACHE_TTL_SECONDS = 6 * 60 * 60;
+	const ACCOUNT_URL = 'https://hscode.info/en/account';
+	const PRICING_URL = 'https://hscode.info/en/pricing';
+	const LANGS = ['de', 'en', 'fr'];
+	const MODES = { fast: 'fast', quick: 'fast', accurate: 'accurate', precise: 'accurate' };
+
+	class HsError extends Error {
+		constructor(code, message, status) {
+			super(message);
+			this.name = 'HsError';
+			this.code = code;
+			this.status = status || 0;
+		}
+	}
+
+	const isBlank = (v) => v === undefined || v === null || v === '';
+
+	function normalizeMode(v) {
+		if (isBlank(v)) return 'fast';
+		const mode = MODES[String(v).trim().toLowerCase()];
+		if (!mode) throw new HsError('invalid_request', 'Mode must be "fast" or "accurate", got "' + v + '".');
+		return mode;
+	}
+
+	function normalizeLang(v) {
+		if (isBlank(v)) return 'en';
+		const lang = String(v).trim().toLowerCase();
+		if (LANGS.indexOf(lang) < 0) throw new HsError('invalid_request', 'Language must be "de", "en" or "fr", got "' + v + '".');
+		return lang;
+	}
+
+	function normalizeText(v) {
+		const text = String(v).replace(/\s+/g, ' ').trim();
+		if (text.length < 2) throw new HsError('invalid_request', 'Description needs at least 2 characters.');
+		if (text.length > 500) throw new HsError('invalid_request', 'Description is longer than 500 characters.');
+		return text;
+	}
+
+	/**
+	 * Goods code to 10 digits. Spaces and dots are stripped. Numbers lose leading zeros in
+	 * spreadsheets, so a 9-digit number is padded on the left. An 8-digit CN code gets "00" appended.
+	 */
+	function normalizeCode(v) {
+		let digits = typeof v === 'number' ? String(Math.round(v)) : String(v).replace(/[\s.]/g, '');
+		if (!/^\d+$/.test(digits)) throw new HsError('invalid_code', 'Goods code must be digits, got "' + v + '".');
+		if (typeof v === 'number' && digits.length === 9) digits = '0' + digits;
+		if (digits.length === 8) digits += '00';
+		if (digits.length !== 10) throw new HsError('invalid_code', 'Goods code must have 8 or 10 digits, got "' + v + '".');
+		return digits;
+	}
+
+	function hash64(str) {
+		let a = 0x811c9dc5;
+		let b = 5381;
+		for (let i = 0; i < str.length; i++) {
+			const c = str.charCodeAt(i);
+			a = Math.imul(a ^ c, 0x01000193) >>> 0;
+			b = (Math.imul(b, 33) + c) >>> 0;
+		}
+		return a.toString(36) + b.toString(36) + str.length.toString(36);
+	}
+
+	// Case-insensitive on the text. Keys stay well under CacheService's 250 character limit.
+	function classifyCacheKey(text, mode, lang) {
+		return 'hs1:c:' + lang + ':' + mode + ':' + hash64(text.toLowerCase());
+	}
+
+	function lookupCacheKey(code, lang) {
+		return 'hs1:l:' + lang + ':' + code;
+	}
+
+	function missingKeyError(where) {
+		return new HsError(
+			'missing_api_key',
+			'No API key set. ' + (where || 'Add your key in the HS Code menu') + '. Get a key at ' + ACCOUNT_URL
+		);
+	}
+
+	// headers: a plain object (Apps Script getHeaders) or a Headers-like object with get().
+	function headerValue(headers, name) {
+		if (!headers) return null;
+		if (typeof headers.get === 'function') return headers.get(name);
+		const wanted = name.toLowerCase();
+		const found = Object.keys(headers).find((k) => k.toLowerCase() === wanted);
+		return found === undefined ? null : headers[found];
+	}
+
+	function errorFromHttp(status, data, headers) {
+		const apiMessage = data && typeof data.message === 'string' ? data.message : '';
+		if (status === 401 || status === 403) {
+			return new HsError('invalid_api_key', 'Invalid API key. Check it at ' + ACCOUNT_URL, status);
+		}
+		if (status === 429) {
+			const wait = parseInt(headerValue(headers, 'Retry-After'), 10);
+			const retry = wait > 0 ? ' Retry in ' + wait + ' s, or upgrade: ' : ' Wait or upgrade: ';
+			return new HsError('quota_exceeded', 'Quota exceeded for your plan.' + retry + PRICING_URL, status);
+		}
+		if (status === 404) return new HsError('not_found', apiMessage || 'Not found.', status);
+		if (status === 400) return new HsError('invalid_request', apiMessage || 'Invalid request.', status);
+		return new HsError('http_error', apiMessage || 'Request failed with status ' + status + '.', status);
+	}
+
+	function parseResponse(status, text, headers) {
+		let data = null;
+		try {
+			data = text ? JSON.parse(text) : null;
+		} catch (e) {
+			data = null;
+		}
+		if (status >= 200 && status < 300) {
+			if (data === null) throw new HsError('bad_response', 'The API returned an unreadable response.', status);
+			return data;
+		}
+		throw errorFromHttp(status, data, headers);
+	}
+
+	/** Platform-neutral request description. Adapters turn it into UrlFetchApp or fetch calls. */
+	function buildRequest(kind, apiKey, params, where) {
+		if (!apiKey) throw missingKeyError(where);
+		const headers = { Authorization: 'Bearer ' + String(apiKey).trim(), Accept: 'application/json' };
+		if (kind === 'classifyBatch') {
+			headers['Content-Type'] = 'application/json';
+			return { method: 'POST', url: API_BASE + '/classify/batch', headers: headers, body: JSON.stringify(params.body) };
+		}
+		if (kind === 'lookup') {
+			return { method: 'GET', url: API_BASE + '/' + params.lang + '/latest/codes/' + params.code, headers: headers };
+		}
+		throw new Error('Unknown request kind ' + kind);
+	}
+
+	function chunk(list, size) {
+		const out = [];
+		for (let i = 0; i < list.length; i += size) out.push(list.slice(i, i + size));
+		return out;
+	}
+
+	function buildClassifyBody(texts, mode, lang) {
+		return {
+			items: texts.map((text, i) => ({ id: String(i), text: text })),
+			mode: mode,
+			lang: lang
+		};
+	}
+
+	/** Maps a batch response to one outcome per requested text: {value} or {error}. */
+	function parseClassifyBatch(response, count) {
+		const byId = {};
+		((response && response.items) || []).forEach((item) => {
+			if (item && item.id !== null && item.id !== undefined) byId[item.id] = item;
+		});
+		const outcomes = [];
+		for (let i = 0; i < count; i++) {
+			const item = byId[String(i)];
+			if (!item) {
+				outcomes.push({ error: new HsError('bad_response', 'The API did not return a result for this row.') });
+			} else if (item.error) {
+				outcomes.push({ error: new HsError('classify_failed', 'Could not classify: ' + item.error) });
+			} else if (!item.results || !item.results.length) {
+				outcomes.push({ error: new HsError('no_match', 'No matching code found.') });
+			} else {
+				const top = item.results[0];
+				outcomes.push({
+					value: {
+						code: top.goods_code,
+						description: top.description,
+						confidence: top.confidence === undefined ? null : top.confidence
+					}
+				});
+			}
+		}
+		return outcomes;
+	}
+
+	/** Cache-sized view of GET /codes: description and duty rows only. */
+	function compactLookup(detail) {
+		return {
+			description: detail.description,
+			duties: (detail.duties || []).map((d) => ({
+				origin: d.origin,
+				origin_code: d.origin_code,
+				duty: d.duty,
+				meas_type_code: d.meas_type_code
+			}))
+		};
+	}
+
+	/** Returns {notFound:true} for 404, else compactLookup. Throws HsError for other failures. */
+	function parseLookup(status, text, headers) {
+		if (status === 404) return { notFound: true };
+		return compactLookup(parseResponse(status, text, headers));
+	}
+
+	const isThirdCountry = (d) => d.origin_code === '1011' && d.meas_type_code === '103';
+
+	/**
+	 * Without an origin: the erga omnes (third-country) duty. With an origin (ISO code like "CN",
+	 * or the origin name): the duty row listed for that origin, else the third-country duty.
+	 */
+	function pickDuty(duties, origin) {
+		const list = duties || [];
+		if (!isBlank(origin)) {
+			const wanted = String(origin).trim().toLowerCase();
+			const match = list.find(
+				(d) => !isThirdCountry(d) && (String(d.origin_code).toLowerCase() === wanted || String(d.origin).toLowerCase() === wanted)
+			);
+			if (match) return match.duty;
+		}
+		const third = list.find(isThirdCountry);
+		if (!third) throw new HsError('no_duty', 'No third-country duty is listed for this code.');
+		return third.duty;
+	}
+
+	function isGrid(v) {
+		return Array.isArray(v);
+	}
+
+	/** Applies fn to a scalar or every cell of a 1D/2D range. The result has the same shape. */
+	function mapGrid(input, fn) {
+		if (!isGrid(input)) return fn(input);
+		return input.map((row) => (isGrid(row) ? row.map((v) => fn(v)) : fn(row)));
+	}
+
+	function formatError(e) {
+		return e instanceof HsError ? e.message : 'Unexpected error: ' + (e && e.message ? e.message : e);
+	}
+
+	/**
+	 * Collects classify calls made close together and sends them as batches of up to 25.
+	 * send(body) must resolve with the parsed batch response. classify() never rejects.
+	 */
+	function createClassifyQueue(options) {
+		const send = options.send;
+		const delayMs = options.delayMs === undefined ? 40 : options.delayMs;
+		const pending = new Map();
+		let timer = null;
+
+		async function run(group, texts) {
+			let outcomes;
+			try {
+				const response = await send(buildClassifyBody(texts, group.mode, group.lang));
+				outcomes = parseClassifyBatch(response, texts.length);
+			} catch (e) {
+				outcomes = texts.map(() => ({ error: e }));
+			}
+			texts.forEach((text, i) => group.entries.get(text).forEach((resolve) => resolve(outcomes[i])));
+		}
+
+		function flush() {
+			timer = null;
+			const groups = Array.from(pending.values());
+			pending.clear();
+			const jobs = [];
+			groups.forEach((group) => {
+				chunk(Array.from(group.entries.keys()), MAX_BATCH).forEach((texts) => jobs.push(run(group, texts)));
+			});
+			return Promise.all(jobs);
+		}
+
+		function classify(text, mode, lang) {
+			return new Promise((resolve) => {
+				const key = mode + '|' + lang;
+				let group = pending.get(key);
+				if (!group) {
+					group = { mode: mode, lang: lang, entries: new Map() };
+					pending.set(key, group);
+				}
+				let waiting = group.entries.get(text);
+				if (!waiting) {
+					waiting = [];
+					group.entries.set(text, waiting);
+				}
+				waiting.push(resolve);
+				if (timer === null) timer = setTimeout(flush, delayMs);
+			});
+		}
+
+		return { classify: classify };
+	}
+
+	return {
+		API_BASE: API_BASE,
+		MAX_BATCH: MAX_BATCH,
+		CACHE_TTL_SECONDS: CACHE_TTL_SECONDS,
+		HsError: HsError,
+		isBlank: isBlank,
+		normalizeMode: normalizeMode,
+		normalizeLang: normalizeLang,
+		normalizeText: normalizeText,
+		normalizeCode: normalizeCode,
+		hash64: hash64,
+		classifyCacheKey: classifyCacheKey,
+		lookupCacheKey: lookupCacheKey,
+		missingKeyError: missingKeyError,
+		errorFromHttp: errorFromHttp,
+		headerValue: headerValue,
+		parseResponse: parseResponse,
+		buildRequest: buildRequest,
+		chunk: chunk,
+		buildClassifyBody: buildClassifyBody,
+		parseClassifyBatch: parseClassifyBatch,
+		compactLookup: compactLookup,
+		parseLookup: parseLookup,
+		pickDuty: pickDuty,
+		mapGrid: mapGrid,
+		formatError: formatError,
+		createClassifyQueue: createClassifyQueue
+	};
+})();
+
+if (typeof module !== 'undefined' && module.exports) module.exports = HsCore;
