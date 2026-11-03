@@ -81,6 +81,10 @@
 					},
 					"description": {
 						"type": "string"
+					},
+					"context": {
+						"description": "Latest year only: the headings above the code, \"Other\" left out, e.g. \"Shrimps and prawns › Frozen\".",
+						"type": "string"
 					}
 				},
 				"required": [
