@@ -1,7 +1,10 @@
 # hscode
 
-SDK and CLI for the [hscode.info](https://hscode.info/en/developers) EU customs tariff API: classify a product into its CN / TARIC code and read the import duties that apply.
+Python SDK for the [hscode.info](https://hscode.info/en/developers) EU customs tariff (TARIC) API: HS code classification, CN code lookup and import duties.
 
-The package is in development. Until it ships, use the REST API (`https://hscode.info/api/v1`, [reference](https://hscode.info/api/v1/docs)) or connect an AI agent to the MCP server at `https://hscode.info/mcp`.
+Coming soon. This release reserves the name.
 
-Free plan and pricing: https://hscode.info/en/pricing
+Until then, use the [REST API](https://hscode.info/api/v1/docs), the [TypeScript SDK and CLI](https://github.com/hscode-info/hscode/tree/main/js) (`npx @hscode/sdk`), or connect an AI agent to the [MCP server](https://hscode.info/mcp).
+
+- [Pricing](https://hscode.info/en/pricing)
+- [Source](https://github.com/hscode-info/hscode)

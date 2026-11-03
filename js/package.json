@@ -1,7 +1,7 @@
 {
 	"name": "@hscode/sdk",
 	"version": "0.1.0",
-	"description": "EU customs tariff (TARIC) SDK and CLI for hscode.info: classify products into CN codes and read import duties.",
+	"description": "HS code API, SDK and CLI for the EU customs tariff (TARIC): classify products into CN codes and get import duties from Node.js, the shell or an AI agent.",
 	"homepage": "https://hscode.info/en/developers",
 	"repository": {
 		"type": "git",
@@ -9,9 +9,35 @@
 		"directory": "js"
 	},
 	"license": "MIT",
-	"keywords": ["hs code", "taric", "customs", "tariff", "cn code", "import duty", "mcp"],
+	"keywords": [
+		"hs code",
+		"hs code api",
+		"hs code lookup",
+		"hs code classification",
+		"taric",
+		"taric api",
+		"cn code",
+		"combined nomenclature",
+		"eu customs tariff",
+		"customs",
+		"tariff",
+		"import duty",
+		"customs duty",
+		"customs duty calculator",
+		"zolltarifnummer",
+		"bti",
+		"ebti",
+		"mcp",
+		"mcp server",
+		"ai agent",
+		"typescript",
+		"cli",
+		"csv classification"
+	],
 	"type": "module",
-	"engines": { "node": ">=20" },
+	"engines": {
+		"node": ">=20"
+	},
 	"main": "./dist/index.js",
 	"types": "./dist/index.d.ts",
 	"exports": {
@@ -20,8 +46,12 @@
 			"default": "./dist/index.js"
 		}
 	},
-	"bin": { "hscode": "dist/cli.js" },
-	"files": ["dist"],
+	"bin": {
+		"hscode": "dist/cli.js"
+	},
+	"files": [
+		"dist"
+	],
 	"scripts": {
 		"spec": "node scripts/fetch-spec.mjs && npm run types",
 		"types": "openapi-typescript ../openapi.json -o src/schema.ts",
