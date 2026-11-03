@@ -1,0 +1,9 @@
+[
+  { "name": "query", "type": "text", "label": "Query", "required": true },
+  { "name": "year", "type": "text", "label": "Year", "default": "latest" },
+  { "name": "lang", "type": "select", "label": "Language", "default": "en", "options": [
+    { "label": "English", "value": "en" },
+    { "label": "German", "value": "de" },
+    { "label": "French", "value": "fr" }
+  ] }
+]

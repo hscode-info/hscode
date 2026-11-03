@@ -1,0 +1,12 @@
+{
+  "url": "/classify",
+  "method": "POST",
+  "body": {
+    "text": "{{parameters.text}}",
+    "mode": "{{ifempty(parameters.mode; \"fast\")}}",
+    "lang": "{{ifempty(parameters.lang; \"en\")}}"
+  },
+  "response": {
+    "output": "{{body}}"
+  }
+}

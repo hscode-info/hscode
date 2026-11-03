@@ -1,0 +1,10 @@
+{
+  "url": "/snapshots",
+  "method": "GET",
+  "headers": {
+    "Authorization": "Bearer {{parameters.apiKey}}"
+  },
+  "log": {
+    "sanitize": ["request.headers.authorization"]
+  }
+}

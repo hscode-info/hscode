@@ -1,0 +1,8 @@
+{
+  "name": "classify",
+  "label": "Classify Product",
+  "description": "Finds the EU CN code for a product description.",
+  "connection": "hscode",
+  "moduleType": "action",
+  "actionCrud": "create"
+}

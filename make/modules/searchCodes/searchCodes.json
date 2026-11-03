@@ -1,0 +1,8 @@
+{
+  "name": "searchCodes",
+  "label": "Search Codes",
+  "description": "Searches CN codes by words, in any language.",
+  "connection": "hscode",
+  "moduleType": "search",
+  "actionCrud": "search"
+}
