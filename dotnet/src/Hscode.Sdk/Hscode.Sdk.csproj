@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;net8.0</TargetFrameworks>
+    <LangVersion>12.0</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <RootNamespace>Hscode</RootNamespace>
+    <AssemblyName>Hscode.Sdk</AssemblyName>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+
+    <PackageId>Hscode.Sdk</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>hscode.info</Authors>
+    <Description>EU customs tariff (TARIC) API client for .NET: classify products into HS / CN codes, look up codes and get import duties from hscode.info.</Description>
+    <PackageTags>hs-code;customs;tariff;taric;cn-code;import-duty;classification;hscode</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://hscode.info/en/developers</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/hscode-info/hscode</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
+  </ItemGroup>
+
+</Project>
