@@ -44,9 +44,10 @@ flowchart LR
     A[Your code<br/>TypeScript SDK] -->|HTTPS + Bearer key| API
     B[Shell<br/>hscode CLI] -->|HTTPS + Bearer key| API
     C[AI agent<br/>MCP client] -->|MCP| M[hscode.info/mcp]
-    D[Chrome<br/>WebMCP] -->|same four tools| M
+    D[AI agent in Chrome<br/>WebMCP] -->|same four tools| W[any hscode.info page]
     API["hscode.info/api/v1"] --> R[CN codes + import duties]
     M --> R
+    W --> R
 ```
 
 ## Packages
