@@ -93,18 +93,7 @@ export function createClient(options: ClientOptions = {}) {
 		return data as T;
 	}
 
-	let latest: Promise<string> | undefined;
-	function resolveYear(year?: string): Promise<string> | string {
-		if (year) return year;
-		latest ??= request<SnapshotsResponse>('GET', '/api/v1/snapshots').then(
-			(s) => s.latest.year,
-			(e) => {
-				latest = undefined;
-				throw e;
-			}
-		);
-		return latest;
-	}
+	const yearOf = (year?: string) => year ?? 'latest';
 
 	async function lookup(input: {
 		code: string;
@@ -113,7 +102,7 @@ export function createClient(options: ClientOptions = {}) {
 		history?: boolean;
 	} & Signal) {
 		const code = normalizeCode(input.code);
-		const year = await resolveYear(input.year);
+		const year = yearOf(input.year);
 		return request<CodeDetail>('GET', `/api/v1/${input.lang ?? 'en'}/${year}/codes/${code}`, {
 			query: { history: input.history ? 'true' : undefined },
 			signal: input.signal
@@ -139,7 +128,7 @@ export function createClient(options: ClientOptions = {}) {
 			lookup({ ...input, history: true }),
 
 		search: async (input: { query: string; lang?: Lang; year?: string } & Signal) => {
-			const year = await resolveYear(input.year);
+			const year = yearOf(input.year);
 			return request<SearchResponse>('GET', `/api/v1/${input.lang ?? 'en'}/${year}/search`, {
 				query: { q: input.query },
 				signal: input.signal
@@ -148,14 +137,14 @@ export function createClient(options: ClientOptions = {}) {
 
 		duties: async (input: { code: string; year?: string } & Signal) => {
 			const code = normalizeCode(input.code);
-			const year = await resolveYear(input.year);
+			const year = yearOf(input.year);
 			return request<DutiesResponse>('GET', `/api/v1/${year}/duties/${code}`, {
 				signal: input.signal
 			});
 		},
 
 		chapters: async (input: { lang?: Lang; year?: string } & Signal = {}) => {
-			const year = await resolveYear(input.year);
+			const year = yearOf(input.year);
 			return request<ChaptersResponse>('GET', `/api/v1/${input.lang ?? 'en'}/${year}/chapters`, {
 				signal: input.signal
 			});
@@ -164,7 +153,7 @@ export function createClient(options: ClientOptions = {}) {
 		chapter: async (input: { chapter: string; lang?: Lang; year?: string } & Signal) => {
 			const chapter = String(input.chapter);
 			if (!/^\d{2}$/.test(chapter)) throw invalid(`Chapter must have 2 digits, got "${chapter}".`);
-			const year = await resolveYear(input.year);
+			const year = yearOf(input.year);
 			return request<ChapterResponse>(
 				'GET',
 				`/api/v1/${input.lang ?? 'en'}/${year}/chapters/${chapter}`,

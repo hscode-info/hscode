@@ -415,7 +415,7 @@ export interface operations {
             path: {
                 /** @description Description language. */
                 lang: "de" | "en" | "fr";
-                /** @description Snapshot year, see `GET /snapshots`. */
+                /** @description Snapshot year, see `GET /snapshots`, or `latest` for the newest one. */
                 year: string;
             };
             cookie?: never;
@@ -478,7 +478,7 @@ export interface operations {
             path: {
                 /** @description Description language. */
                 lang: "de" | "en" | "fr";
-                /** @description Snapshot year, see `GET /snapshots`. */
+                /** @description Snapshot year, see `GET /snapshots`, or `latest` for the newest one. */
                 year: string;
                 /** @description 2-digit HS chapter. */
                 chapter: string;
@@ -545,7 +545,7 @@ export interface operations {
             path: {
                 /** @description Description language. */
                 lang: "de" | "en" | "fr";
-                /** @description Snapshot year, see `GET /snapshots`. */
+                /** @description Snapshot year, see `GET /snapshots`, or `latest` for the newest one. */
                 year: string;
             };
             cookie?: never;
@@ -606,7 +606,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description Snapshot year, see `GET /snapshots`. */
+                /** @description Snapshot year, see `GET /snapshots`, or `latest` for the newest one. */
                 year: string;
                 /** @description 10-digit TARIC goods code. */
                 goodsCode: string;
@@ -674,7 +674,7 @@ export interface operations {
             path: {
                 /** @description Description language. */
                 lang: "de" | "en" | "fr";
-                /** @description Snapshot year, see `GET /snapshots`. */
+                /** @description Snapshot year, see `GET /snapshots`, or `latest` for the newest one. */
                 year: string;
                 /** @description 10-digit TARIC goods code. */
                 goodsCode: string;

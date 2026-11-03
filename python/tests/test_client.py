@@ -1,3 +1,4 @@
+import re
 import io
 import json
 import os
@@ -69,8 +70,8 @@ def make(handler=route, **kwargs):
     return Client(api_key=kwargs.pop("api_key", "k_test"), opener=opener, **kwargs), opener
 
 
-def test_version_is_defined_once():
-    assert hscode.__version__ == "0.1.0"
+def test_version_is_a_release_number():
+    assert re.fullmatch(r"\d+\.\d+\.\d+", hscode.__version__)
 
 
 def test_sends_auth_user_agent_and_json_body_on_classify():
@@ -80,7 +81,7 @@ def test_sends_auth_user_agent_and_json_body_on_classify():
     assert call["url"] == "https://hscode.info/api/v1/classify"
     assert call["method"] == "POST"
     assert call["headers"]["authorization"] == "Bearer k_test"
-    assert call["headers"]["user-agent"] == "hscode-python/0.1.0"
+    assert call["headers"]["user-agent"] == f"hscode-python/{hscode.__version__}"
     assert call["headers"]["accept"] == "application/json"
     assert call["headers"]["content-type"] == "application/json"
     assert call["body"] == {"text": "cotton t-shirt", "mode": "accurate", "lang": "en"}
@@ -137,30 +138,14 @@ def test_history_is_lookup_with_history():
     assert opener.urls == ["https://hscode.info/api/v1/en/2026/codes/6109100010?history=true"]
 
 
-def test_resolves_latest_year_once_across_calls():
+def test_omitted_year_asks_for_latest_in_the_same_request():
     client, opener = make()
     client.lookup("6109100010")
     client.search("shirt")
-    assert sum(u.endswith("/snapshots") for u in opener.urls) == 1
-    assert "https://hscode.info/api/v1/en/2026/codes/6109100010" in opener.urls
-    assert "https://hscode.info/api/v1/en/2026/search?q=shirt" in opener.urls
-
-
-def test_failed_year_resolution_is_retried():
-    state = {"n": 0}
-
-    def handler(call):
-        if call["url"].endswith("/snapshots"):
-            state["n"] += 1
-            if state["n"] == 1:
-                return 429, {"error": "rate_limited", "message": "slow down"}
-        return route(call)
-
-    client, opener = make(handler)
-    with pytest.raises(HscodeError):
-        client.search("x")
-    client.search("x")
-    assert opener.urls[-1].endswith("/en/2026/search?q=x")
+    assert opener.urls == [
+        "https://hscode.info/api/v1/en/latest/codes/6109100010",
+        "https://hscode.info/api/v1/en/latest/search?q=shirt",
+    ]
 
 
 def test_accepts_codes_with_spaces_and_dots():

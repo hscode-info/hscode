@@ -54,8 +54,8 @@ flowchart LR
 
 | Package | Language | Install | Status |
 | --- | --- | --- | --- |
-| [`@hscode/sdk`](js/) | JavaScript / TypeScript, Node.js 20+ | `npm i @hscode/sdk` | 0.1.0 |
-| [`hscode`](python/) | Python 3.9+ | `pip install hscode` | 0.1.0 |
+| [`@hscode/sdk`](js/) | JavaScript / TypeScript, Node.js 20+ | `npm i @hscode/sdk` | 0.1.1 |
+| [`hscode`](python/) | Python 3.9+ | `pip install hscode` | 0.1.1 |
 
 ## CLI
 

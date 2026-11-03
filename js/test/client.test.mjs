@@ -65,15 +65,18 @@ test('builds the URL for each read method', async () => {
 	);
 });
 
-test('resolves the latest year once across calls', async () => {
+test('an omitted year asks for the latest snapshot in the same request', async () => {
 	const fetch = fakeFetch(route);
 	const c = createClient({ apiKey: 'k', fetch });
 	await c.lookup({ code: '6109100010' });
 	await c.search({ query: 'shirt' });
-	const urls = fetch.calls.map((x) => x.url);
-	assert.equal(urls.filter((u) => u.endsWith('/snapshots')).length, 1);
-	assert.ok(urls.includes('https://hscode.info/api/v1/en/2026/codes/6109100010'));
-	assert.ok(urls.includes('https://hscode.info/api/v1/en/2026/search?q=shirt'));
+	assert.deepEqual(
+		fetch.calls.map((x) => x.url),
+		[
+			'https://hscode.info/api/v1/en/latest/codes/6109100010',
+			'https://hscode.info/api/v1/en/latest/search?q=shirt'
+		]
+	);
 });
 
 test('accepts codes with spaces and dots', async () => {
@@ -108,20 +111,6 @@ test('throws HscodeError with status and code on 401 and 429', async () => {
 			return true;
 		});
 	}
-});
-
-test('retries year resolution after a failure', async () => {
-	let n = 0;
-	const fetch = fakeFetch((call) => {
-		if (call.url.endsWith('/snapshots') && n++ === 0) {
-			return { status: 429, body: { error: 'rate_limited', message: 'slow down' } };
-		}
-		return route(call);
-	});
-	const c = createClient({ apiKey: 'k', fetch });
-	await assert.rejects(c.search({ query: 'x' }));
-	await c.search({ query: 'x' });
-	assert.ok(fetch.calls.at(-1).url.includes('/en/2026/search'));
 });
 
 test('missing key throws before any request', async () => {

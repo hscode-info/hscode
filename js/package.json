@@ -1,6 +1,6 @@
 {
 	"name": "@hscode/sdk",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "HS code API, SDK and CLI for the EU customs tariff (TARIC): classify products into CN codes and get import duties from Node.js, the shell or an AI agent.",
 	"homepage": "https://hscode.info/en/developers",
 	"repository": {

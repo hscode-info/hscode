@@ -59,7 +59,6 @@ class Client:
         self._base_url = base_url.rstrip("/")
         self._timeout = timeout
         self._opener: Opener = opener or urllib.request.urlopen
-        self._latest_year: Optional[str] = None
 
     def _request(
         self,
@@ -114,12 +113,9 @@ class Client:
             payload.get("message") or f"Request failed with status {e.code}.",
         )
 
-    def _year(self, year: Optional[str]) -> str:
-        if year:
-            return year
-        if self._latest_year is None:
-            self._latest_year = self.snapshots()["latest"]["year"]
-        return self._latest_year
+    @staticmethod
+    def _year(year: Optional[str]) -> str:
+        return year or "latest"
 
     def classify(
         self, text: str, mode: Mode = "fast", lang: Lang = "en"

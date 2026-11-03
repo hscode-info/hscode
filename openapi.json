@@ -924,11 +924,11 @@
 						"name": "year",
 						"schema": {
 							"type": "string",
-							"pattern": "^\\d{4}$",
-							"example": "2026"
+							"pattern": "^(\\d{4}|latest)$",
+							"example": "latest"
 						},
 						"required": true,
-						"description": "Snapshot year, see `GET /snapshots`."
+						"description": "Snapshot year, see `GET /snapshots`, or `latest` for the newest one."
 					}
 				]
 			}
@@ -1023,11 +1023,11 @@
 						"name": "year",
 						"schema": {
 							"type": "string",
-							"pattern": "^\\d{4}$",
-							"example": "2026"
+							"pattern": "^(\\d{4}|latest)$",
+							"example": "latest"
 						},
 						"required": true,
-						"description": "Snapshot year, see `GET /snapshots`."
+						"description": "Snapshot year, see `GET /snapshots`, or `latest` for the newest one."
 					},
 					{
 						"in": "path",
@@ -1133,11 +1133,11 @@
 						"name": "year",
 						"schema": {
 							"type": "string",
-							"pattern": "^\\d{4}$",
-							"example": "2026"
+							"pattern": "^(\\d{4}|latest)$",
+							"example": "latest"
 						},
 						"required": true,
-						"description": "Snapshot year, see `GET /snapshots`."
+						"description": "Snapshot year, see `GET /snapshots`, or `latest` for the newest one."
 					},
 					{
 						"in": "query",
@@ -1228,11 +1228,11 @@
 						"name": "year",
 						"schema": {
 							"type": "string",
-							"pattern": "^\\d{4}$",
-							"example": "2026"
+							"pattern": "^(\\d{4}|latest)$",
+							"example": "latest"
 						},
 						"required": true,
-						"description": "Snapshot year, see `GET /snapshots`."
+						"description": "Snapshot year, see `GET /snapshots`, or `latest` for the newest one."
 					},
 					{
 						"in": "path",
@@ -1327,11 +1327,11 @@
 						"name": "year",
 						"schema": {
 							"type": "string",
-							"pattern": "^\\d{4}$",
-							"example": "2026"
+							"pattern": "^(\\d{4}|latest)$",
+							"example": "latest"
 						},
 						"required": true,
-						"description": "Snapshot year, see `GET /snapshots`."
+						"description": "Snapshot year, see `GET /snapshots`, or `latest` for the newest one."
 					},
 					{
 						"in": "path",
