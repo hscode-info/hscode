@@ -84,7 +84,7 @@ sequenceDiagram
         A-->>C: codes per row
         C-->>U: progress on stderr
     end
-    C-->>U: CSV with hs_code, description, confidence
+    C-->>U: CSV with hs_code, hs_description, hs_confidence
 ```
 
 ## SDK

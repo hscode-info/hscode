@@ -137,7 +137,7 @@ The package installs a `hscode` command. It reads the key from `HSCODE_KEY` or `
 | `hscode search <query...> [--year] [--lang]` | Search codes by words. |
 | `hscode history <code> [--lang]` | Third-country duty in every yearly snapshot. |
 | `hscode validate <code>` | Exit 0 and print the description if the code exists in the latest snapshot. Exit 1 if not. Exit 2 on other errors. |
-| `hscode batch <file.csv> [--column description] [--accurate] [--lang]` | CSV classification. Writes the CSV to stdout with `hs_code`, `description` and `confidence` added. |
+| `hscode batch <file.csv> [--column description] [--accurate] [--lang]` | CSV classification. Writes the CSV to stdout with `hs_code`, `hs_description` and `hs_confidence` added. |
 
 Run `hscode --help` or `hscode <command> --help` for usage, and `hscode --version` for the version.
 

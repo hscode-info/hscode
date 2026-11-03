@@ -22,6 +22,8 @@ test('uses the baseUrl option', async () => {
 	assert.equal(fetch.calls[0].url, 'http://localhost:5173/api/v1/snapshots');
 });
 
+const LIVE_KEY = process.env.HSCODE_KEY;
+
 test('reads the key from HSCODE_KEY', async () => {
 	process.env.HSCODE_KEY = 'from_env';
 	try {
@@ -129,7 +131,17 @@ test('missing key throws before any request', async () => {
 	assert.equal(fetch.calls.length, 0);
 });
 
-test('live API', { skip: !(process.env.HSCODE_LIVE === '1' && process.env.HSCODE_KEY) }, async () => {
-	const s = await createClient().snapshots();
+test('live API', { skip: !(process.env.HSCODE_LIVE === '1' && LIVE_KEY) }, async () => {
+	const c = createClient({ apiKey: LIVE_KEY });
+	const s = await c.snapshots();
 	assert.match(s.latest.year, /^\d{4}$/);
+
+	const { results } = await c.classify({ text: 'cotton t-shirt' });
+	assert.match(results[0].goods_code, /^\d{10}$/);
+
+	const detail = await c.lookup({ code: '6109 10 00 10' });
+	assert.ok(
+		detail.duties.some((d) => d.origin_code === '1011' && d.meas_type_code === '103'),
+		'erga omnes third-country duty present'
+	);
 });

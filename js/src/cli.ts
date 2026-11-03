@@ -23,7 +23,7 @@ const COMMANDS: Record<string, string> = {
 	search: 'search <query...> [--year 2026] [--lang de|en|fr]\n  Search codes by words.',
 	history: 'history <code> [--lang de|en|fr]\n  Show the third-country duty of a code in every yearly snapshot.',
 	validate: 'validate <code>\n  Exit 0 if the code exists in the latest snapshot, 1 if not, 2 on other errors.',
-	batch: 'batch <file.csv> [--column description] [--accurate] [--lang de|en|fr]\n  Classify one CSV column in chunks of 25. Writes CSV with hs_code,description,confidence added.'
+	batch: 'batch <file.csv> [--column description] [--accurate] [--lang de|en|fr]\n  Classify one CSV column in chunks of 25. Writes CSV with hs_code,hs_description,hs_confidence added.'
 };
 
 const HELP = `hscode <command> [options]
@@ -45,8 +45,21 @@ Docs: https://hscode.info/api/v1/docs
 
 class UsageError extends Error {}
 
-const formatCode = (c: string) =>
-	c.length === 10 ? `${c.slice(0, 4)} ${c.slice(4, 6)} ${c.slice(6, 8)} ${c.slice(8)}` : c;
+// Search hits carry the TARIC product-line suffix after the 10 digits ("6109100010 80").
+const formatCode = (code: string) => {
+	const c = code.replace(/\D/g, '').slice(0, 10);
+	return c.length === 10 ? `${c.slice(0, 4)} ${c.slice(4, 6)} ${c.slice(6, 8)} ${c.slice(8)}` : code;
+};
+
+// Leaf rows are often just "Other" or "Of cotton"; the nearest distinct ancestor says what they are.
+function label(path: string[] | undefined, description: string): string {
+	if (!path || description.length >= 20) return description;
+	const ancestors = path.slice(0, -1).filter((segment) => segment !== description);
+	const parent = ancestors.findLast((segment) => segment.length >= 20) ?? ancestors.at(-1);
+	if (!parent) return description;
+	const short = parent.length > 50 ? `${parent.slice(0, 49)}…` : parent;
+	return `${short} › ${description}`;
+}
 
 const isErgaOmnes = (d: ImportDuty) => d.origin_code === '1011' && d.meas_type_code === '103';
 const thirdCountryDuty = (duties: ImportDuty[] | undefined) => duties?.find(isErgaOmnes)?.duty;
@@ -68,7 +81,7 @@ function classifyRows(results: ClassifyResult[]): string[][] {
 		const row = [`${i + 1}.`, formatCode(r.goods_code)];
 		if (showDuty) row.push(thirdCountryDuty(r.duties) ?? '-');
 		if (showConf) row.push(r.confidence != null ? r.confidence.toFixed(2) : '-');
-		row.push(r.description);
+		row.push(label(r.path, r.description));
 		return row;
 	});
 }
@@ -215,7 +228,7 @@ export async function main(argv: string[], io: CliIo = {}): Promise<number> {
 		const col = values.column ? header.indexOf(values.column) : 0;
 		if (col < 0) throw new UsageError(`Column "${values.column}" not found. Columns: ${header.join(', ')}`);
 
-		const outRows = [[...header, 'hs_code', 'description', 'confidence']];
+		const outRows = [[...header, 'hs_code', 'hs_description', 'hs_confidence']];
 		for (let start = 0; start < rows.length; start += BATCH_SIZE) {
 			const chunk = rows.slice(start, start + BATCH_SIZE);
 			const items = chunk.flatMap((r, i) => {
@@ -235,11 +248,11 @@ export async function main(argv: string[], io: CliIo = {}): Promise<number> {
 				outRows.push([
 					...r,
 					top?.goods_code ?? '',
-					top?.description ?? '',
+					top ? label(top.path, top.description) : '',
 					top?.confidence != null ? String(top.confidence) : ''
 				]);
 			});
-			err(`Classified ${Math.min(start + BATCH_SIZE, rows.length)}/${rows.length}\n`);
+			err(`Processed ${Math.min(start + BATCH_SIZE, rows.length)}/${rows.length} rows\n`);
 		}
 		out(toCsv(outRows));
 		return 0;

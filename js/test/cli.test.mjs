@@ -106,12 +106,12 @@ test('batch writes CSV with a quoted comma and appends result columns', async ()
 	assert.equal(fetch.calls[0].body.items.length, 2);
 	assert.equal(
 		r.stdout,
-		'sku,description,hs_code,description,confidence\n' +
+		'sku,description,hs_code,hs_description,hs_confidence\n' +
 			'A1,"shirt, cotton",6109100010,"d, 0",0.9\n' +
 			'B2,"5"" nail",7317000000,"d, 1",\n' +
 			'C3,,,,\n'
 	);
-	assert.match(r.stderr, /Classified 3\/3/);
+	assert.match(r.stderr, /Processed 3\/3 rows/);
 });
 
 test('batch sends 25 rows per call', async () => {
