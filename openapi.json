@@ -1,0 +1,1507 @@
+{
+	"openapi": "3.1.0",
+	"info": {
+		"title": "hscode.info API",
+		"description": "EU customs tariff (TARIC) nomenclature and import duties in German, English and French. Every call needs `Authorization: Bearer <key>` and counts against your plan quota: classification spends AI units, every other call one lookup. On paid plans, AI units past the quota are billed at USD 0.012 each, up to twice the quota, from 30 days after the plan started. Responses carry rate-limit headers for the quota the call spent.",
+		"version": "1.0.0"
+	},
+	"servers": [
+		{
+			"url": "https://hscode.info"
+		}
+	],
+	"components": {
+		"securitySchemes": {
+			"bearer": {
+				"type": "http",
+				"scheme": "bearer"
+			}
+		},
+		"schemas": {
+			"Snapshot": {
+				"type": "object",
+				"properties": {
+					"year": {
+						"type": "string"
+					},
+					"month": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"year",
+					"month"
+				]
+			},
+			"ApiError": {
+				"type": "object",
+				"properties": {
+					"error": {
+						"type": "string"
+					},
+					"message": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"error",
+					"message"
+				]
+			},
+			"NomenclatureItem": {
+				"type": "object",
+				"properties": {
+					"goods_code": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					},
+					"indent": {
+						"type": "string"
+					},
+					"hier_pos": {
+						"type": "integer",
+						"minimum": -9007199254740991,
+						"maximum": 9007199254740991
+					}
+				},
+				"required": [
+					"goods_code",
+					"description",
+					"indent",
+					"hier_pos"
+				]
+			},
+			"SearchHit": {
+				"type": "object",
+				"properties": {
+					"goods_code": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"goods_code",
+					"description"
+				]
+			},
+			"ImportDutyItem": {
+				"type": "object",
+				"properties": {
+					"goods_code": {
+						"type": "string"
+					},
+					"origin": {
+						"type": "string"
+					},
+					"origin_code": {
+						"type": "string"
+					},
+					"start_date": {
+						"type": "string"
+					},
+					"end_date": {
+						"type": "string"
+					},
+					"duty": {
+						"type": "string"
+					},
+					"legal_base": {
+						"type": "string"
+					},
+					"measure_type": {
+						"type": "string"
+					},
+					"meas_type_code": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"goods_code",
+					"origin",
+					"origin_code",
+					"start_date",
+					"end_date",
+					"duty",
+					"legal_base",
+					"measure_type",
+					"meas_type_code"
+				]
+			},
+			"CodeDetail": {
+				"type": "object",
+				"properties": {
+					"goods_code": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					},
+					"hierarchy": {
+						"type": "array",
+						"items": {
+							"$ref": "#/components/schemas/NomenclatureItem"
+						},
+						"description": "Ancestors, chapter first."
+					},
+					"duties": {
+						"type": "array",
+						"items": {
+							"$ref": "#/components/schemas/ImportDutyItem"
+						}
+					},
+					"signals": {
+						"$ref": "#/components/schemas/Signals"
+					},
+					"history": {
+						"description": "Import duties in every yearly snapshot, oldest first (`history=true` only).",
+						"type": "array",
+						"items": {
+							"type": "object",
+							"properties": {
+								"year": {
+									"type": "string"
+								},
+								"month": {
+									"type": "string"
+								},
+								"duties": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/ImportDutyItem"
+									}
+								}
+							},
+							"required": [
+								"year",
+								"month",
+								"duties"
+							]
+						}
+					}
+				},
+				"required": [
+					"goods_code",
+					"description",
+					"hierarchy",
+					"duties"
+				]
+			},
+			"Signals": {
+				"type": "object",
+				"properties": {
+					"restrictions": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"properties": {
+								"kind": {
+									"type": "string",
+									"enum": [
+										"eudr",
+										"cbam",
+										"dual-use",
+										"russia-import",
+										"russia-export"
+									]
+								},
+								"act": {
+									"type": "string"
+								},
+								"annex": {
+									"type": "string"
+								},
+								"note": {
+									"type": "string",
+									"description": "In the language of the request."
+								},
+								"prefix": {
+									"type": "string",
+									"description": "The code prefix the act names."
+								},
+								"narrower": {
+									"type": "boolean",
+									"description": "True when the act names a narrower code than the one asked for."
+								}
+							},
+							"required": [
+								"kind",
+								"act",
+								"annex",
+								"note",
+								"prefix",
+								"narrower"
+							]
+						},
+						"description": "Orientation only, check the act: EUDR, CBAM, dual-use (non-binding table) and Russia sanctions import/export bans."
+					},
+					"quotas": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"properties": {
+								"order": {
+									"type": "string"
+								},
+								"description": {
+									"type": "string"
+								},
+								"origin": {
+									"type": "string"
+								},
+								"period": {
+									"type": "string",
+									"description": "`<start>/<end>`, ISO dates."
+								},
+								"volume": {
+									"type": "number"
+								},
+								"unit": {
+									"type": "string"
+								},
+								"imported": {
+									"type": "number"
+								},
+								"balance": {
+									"type": "number"
+								},
+								"last_import": {
+									"type": [
+										"string",
+										"null"
+									]
+								},
+								"state": {
+									"type": "string",
+									"enum": [
+										"open",
+										"critical",
+										"exhausted"
+									]
+								}
+							},
+							"required": [
+								"order",
+								"description",
+								"origin",
+								"period",
+								"volume",
+								"unit",
+								"imported",
+								"balance",
+								"last_import",
+								"state"
+							]
+						},
+						"description": "Tariff quotas that apply, with the balance at `quotas_as_of`."
+					},
+					"quotas_as_of": {
+						"type": [
+							"string",
+							"null"
+						]
+					},
+					"trade_2025": {
+						"anyOf": [
+							{
+								"type": "object",
+								"properties": {
+									"imports_eur": {
+										"type": "number"
+									},
+									"imports_kg": {
+										"type": "number"
+									},
+									"exports_eur": {
+										"type": "number"
+									},
+									"origins": {
+										"type": "array",
+										"items": {
+											"type": "object",
+											"properties": {
+												"country": {
+													"type": "string"
+												},
+												"imports_eur": {
+													"type": "number"
+												}
+											},
+											"required": [
+												"country",
+												"imports_eur"
+											]
+										}
+									},
+									"cn8_codes": {
+										"type": "integer",
+										"minimum": -9007199254740991,
+										"maximum": 9007199254740991,
+										"description": "CN8 codes summed."
+									}
+								},
+								"required": [
+									"imports_eur",
+									"imports_kg",
+									"exports_eur",
+									"origins",
+									"cn8_codes"
+								]
+							},
+							{
+								"type": "null"
+							}
+						],
+						"description": "Extra-EU trade 2025 of the CN8 code (Eurostat Comext, CC BY 4.0)."
+					},
+					"hs2028": {
+						"anyOf": [
+							{
+								"type": "object",
+								"properties": {
+									"change": {
+										"anyOf": [
+											{
+												"type": "string",
+												"enum": [
+													"split",
+													"moved",
+													"merged",
+													"partial",
+													"new-text"
+												]
+											},
+											{
+												"type": "null"
+											}
+										]
+									},
+									"to": {
+										"type": "array",
+										"items": {
+											"type": "string"
+										}
+									},
+									"heading_deleted": {
+										"type": "boolean"
+									}
+								},
+								"required": [
+									"change",
+									"to",
+									"heading_deleted"
+								]
+							},
+							{
+								"type": "null"
+							}
+						],
+						"description": "The code changes on 1 January 2028 (WCO correlation tables, a guide only). `to` lists HS 2028 subheadings."
+					},
+					"rules_of_origin_url": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"restrictions",
+					"quotas",
+					"quotas_as_of",
+					"trade_2025",
+					"hs2028",
+					"rules_of_origin_url"
+				],
+				"description": "Current data from the latest snapshot, set for the latest year only. Credit: European Commission, Eurostat."
+			},
+			"ClassifyResponse": {
+				"type": "object",
+				"properties": {
+					"snapshot": {
+						"type": "string",
+						"example": "2026-10"
+					},
+					"mode": {
+						"type": "string",
+						"enum": [
+							"fast",
+							"accurate"
+						]
+					},
+					"reranked": {
+						"type": "boolean",
+						"description": "False when the LLM rerank failed or timed out and results are in vector order."
+					},
+					"rewrite": {
+						"description": "The query rewritten into tariff wording, used for the search.",
+						"type": [
+							"string",
+							"null"
+						]
+					},
+					"high_confidence": {
+						"type": "boolean",
+						"description": "True when the first result is very likely right (over 90 % on hard test cases). False says nothing either way; check the alternatives."
+					},
+					"results": {
+						"type": "array",
+						"items": {
+							"$ref": "#/components/schemas/ClassifyResult"
+						}
+					},
+					"question": {
+						"anyOf": [
+							{
+								"type": "object",
+								"properties": {
+									"options": {
+										"type": "array",
+										"items": {
+											"type": "object",
+											"properties": {
+												"label": {
+													"type": "string",
+													"description": "What sets this branch apart, from its path."
+												},
+												"goods_code": {
+													"type": "string",
+													"description": "The best result in this branch."
+												}
+											},
+											"required": [
+												"label",
+												"goods_code"
+											]
+										}
+									}
+								},
+								"required": [
+									"options"
+								]
+							},
+							{
+								"type": "null"
+							}
+						],
+						"description": "Set when the first result is uncertain: the branches the results fall into, best first. Ask which one describes the goods and put that result first."
+					},
+					"disclaimer": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"snapshot",
+					"mode",
+					"reranked",
+					"rewrite",
+					"high_confidence",
+					"results",
+					"question",
+					"disclaimer"
+				]
+			},
+			"ClassifyResult": {
+				"type": "object",
+				"properties": {
+					"goods_code": {
+						"type": "string",
+						"example": "0306179990"
+					},
+					"description": {
+						"type": "string",
+						"description": "The code's own description."
+					},
+					"path": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"description": "Chapter, heading, ... down to the code."
+					},
+					"score": {
+						"type": "number",
+						"description": "Cosine similarity of the best vector match."
+					},
+					"confidence": {
+						"description": "Model confidence 0-1 (`accurate` only, else null).",
+						"type": [
+							"number",
+							"null"
+						]
+					},
+					"reasoning": {
+						"description": "One sentence (`accurate` only).",
+						"type": [
+							"string",
+							"null"
+						]
+					},
+					"duties": {
+						"type": "array",
+						"items": {
+							"$ref": "#/components/schemas/ImportDutyItem"
+						}
+					}
+				},
+				"required": [
+					"goods_code",
+					"description",
+					"path",
+					"score",
+					"confidence",
+					"reasoning",
+					"duties"
+				]
+			},
+			"ClassifyRequest": {
+				"type": "object",
+				"properties": {
+					"text": {
+						"type": "string",
+						"minLength": 2,
+						"maxLength": 500,
+						"description": "Product description in any language.",
+						"example": "frozen shrimp, peeled"
+					},
+					"lang": {
+						"default": "en",
+						"description": "Language of the returned descriptions.",
+						"type": "string",
+						"enum": [
+							"de",
+							"en",
+							"fr"
+						]
+					},
+					"mode": {
+						"default": "fast",
+						"description": "`fast` (about 3-5 s, 1 quota unit) or `accurate` (reasoning model, 6-30 s, 5 quota units, adds confidence and reasoning).",
+						"type": "string",
+						"enum": [
+							"fast",
+							"accurate"
+						]
+					}
+				},
+				"required": [
+					"text"
+				]
+			},
+			"ClassifyBatchResponse": {
+				"type": "object",
+				"properties": {
+					"snapshot": {
+						"type": "string",
+						"example": "2026-10"
+					},
+					"mode": {
+						"type": "string",
+						"enum": [
+							"fast",
+							"accurate"
+						]
+					},
+					"items": {
+						"type": "array",
+						"items": {
+							"$ref": "#/components/schemas/ClassifyBatchItem"
+						},
+						"description": "In request order."
+					},
+					"disclaimer": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"snapshot",
+					"mode",
+					"items",
+					"disclaimer"
+				]
+			},
+			"ClassifyBatchItem": {
+				"type": "object",
+				"properties": {
+					"reranked": {
+						"type": "boolean",
+						"description": "False when the LLM rerank failed or timed out and results are in vector order."
+					},
+					"rewrite": {
+						"description": "The query rewritten into tariff wording, used for the search.",
+						"type": [
+							"string",
+							"null"
+						]
+					},
+					"high_confidence": {
+						"type": "boolean",
+						"description": "True when the first result is very likely right (over 90 % on hard test cases). False says nothing either way; check the alternatives."
+					},
+					"results": {
+						"type": "array",
+						"items": {
+							"$ref": "#/components/schemas/ClassifyResult"
+						}
+					},
+					"question": {
+						"anyOf": [
+							{
+								"type": "object",
+								"properties": {
+									"options": {
+										"type": "array",
+										"items": {
+											"type": "object",
+											"properties": {
+												"label": {
+													"type": "string",
+													"description": "What sets this branch apart, from its path."
+												},
+												"goods_code": {
+													"type": "string",
+													"description": "The best result in this branch."
+												}
+											},
+											"required": [
+												"label",
+												"goods_code"
+											]
+										}
+									}
+								},
+								"required": [
+									"options"
+								]
+							},
+							{
+								"type": "null"
+							}
+						],
+						"description": "Set when the first result is uncertain: the branches the results fall into, best first. Ask which one describes the goods and put that result first."
+					},
+					"id": {
+						"type": [
+							"string",
+							"null"
+						]
+					},
+					"error": {
+						"description": "Set when this item could not be classified; its results are empty.",
+						"type": [
+							"string",
+							"null"
+						]
+					}
+				},
+				"required": [
+					"reranked",
+					"rewrite",
+					"high_confidence",
+					"results",
+					"question",
+					"id",
+					"error"
+				]
+			},
+			"ClassifyBatchRequest": {
+				"type": "object",
+				"properties": {
+					"items": {
+						"minItems": 1,
+						"maxItems": 25,
+						"type": "array",
+						"items": {
+							"type": "object",
+							"properties": {
+								"id": {
+									"description": "Your reference (SKU, line number), returned unchanged.",
+									"example": "SKU-1001",
+									"type": "string",
+									"maxLength": 100
+								},
+								"text": {
+									"type": "string",
+									"minLength": 2,
+									"maxLength": 500,
+									"description": "Product description in any language.",
+									"example": "frozen shrimp, peeled"
+								}
+							},
+							"required": [
+								"text"
+							]
+						}
+					},
+					"lang": {
+						"default": "en",
+						"description": "Language of the returned descriptions.",
+						"type": "string",
+						"enum": [
+							"de",
+							"en",
+							"fr"
+						]
+					},
+					"mode": {
+						"default": "fast",
+						"description": "`fast` (about 3-5 s, 1 quota unit) or `accurate` (reasoning model, 6-30 s, 5 quota units, adds confidence and reasoning).",
+						"type": "string",
+						"enum": [
+							"fast",
+							"accurate"
+						]
+					}
+				},
+				"required": [
+					"items"
+				]
+			}
+		}
+	},
+	"security": [
+		{
+			"bearer": []
+		}
+	],
+	"paths": {
+		"/api/v1/snapshots": {
+			"get": {
+				"operationId": "getApiV1Snapshots",
+				"tags": [
+					"Snapshots"
+				],
+				"summary": "Available languages and yearly TARIC snapshots",
+				"responses": {
+					"200": {
+						"description": "Snapshot manifest.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"langs": {
+											"type": "array",
+											"items": {
+												"type": "string",
+												"enum": [
+													"de",
+													"en",
+													"fr"
+												],
+												"description": "Description language."
+											}
+										},
+										"latest": {
+											"$ref": "#/components/schemas/Snapshot"
+										},
+										"snapshots": {
+											"type": "array",
+											"items": {
+												"$ref": "#/components/schemas/Snapshot"
+											}
+										}
+									},
+									"required": [
+										"langs",
+										"latest",
+										"snapshots"
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Missing or invalid API key.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Plan quota of AI units or lookups exceeded.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/{lang}/{year}/chapters": {
+			"get": {
+				"operationId": "getApiV1ByLangByYearChapters",
+				"tags": [
+					"Nomenclature"
+				],
+				"summary": "Chapter rows of a snapshot",
+				"responses": {
+					"200": {
+						"description": "Chapter rows.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"items": {
+											"type": "array",
+											"items": {
+												"$ref": "#/components/schemas/NomenclatureItem"
+											}
+										}
+									},
+									"required": [
+										"items"
+									]
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Invalid path or query parameter.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Missing or invalid API key.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Unknown snapshot year.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Plan quota of AI units or lookups exceeded.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					}
+				},
+				"parameters": [
+					{
+						"in": "path",
+						"name": "lang",
+						"schema": {
+							"type": "string",
+							"enum": [
+								"de",
+								"en",
+								"fr"
+							]
+						},
+						"required": true,
+						"description": "Description language."
+					},
+					{
+						"in": "path",
+						"name": "year",
+						"schema": {
+							"type": "string",
+							"pattern": "^\\d{4}$",
+							"example": "2026"
+						},
+						"required": true,
+						"description": "Snapshot year, see `GET /snapshots`."
+					}
+				]
+			}
+		},
+		"/api/v1/{lang}/{year}/chapters/{chapter}": {
+			"get": {
+				"operationId": "getApiV1ByLangByYearChaptersByChapter",
+				"tags": [
+					"Nomenclature"
+				],
+				"summary": "Every nomenclature row of one chapter",
+				"responses": {
+					"200": {
+						"description": "Nomenclature rows.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"items": {
+											"type": "array",
+											"items": {
+												"$ref": "#/components/schemas/NomenclatureItem"
+											}
+										}
+									},
+									"required": [
+										"items"
+									]
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Invalid path or query parameter.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Missing or invalid API key.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Unknown snapshot year.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Plan quota of AI units or lookups exceeded.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					}
+				},
+				"parameters": [
+					{
+						"in": "path",
+						"name": "lang",
+						"schema": {
+							"type": "string",
+							"enum": [
+								"de",
+								"en",
+								"fr"
+							]
+						},
+						"required": true,
+						"description": "Description language."
+					},
+					{
+						"in": "path",
+						"name": "year",
+						"schema": {
+							"type": "string",
+							"pattern": "^\\d{4}$",
+							"example": "2026"
+						},
+						"required": true,
+						"description": "Snapshot year, see `GET /snapshots`."
+					},
+					{
+						"in": "path",
+						"name": "chapter",
+						"schema": {
+							"type": "string",
+							"pattern": "^\\d{2}$",
+							"example": "01"
+						},
+						"required": true,
+						"description": "2-digit HS chapter."
+					}
+				]
+			}
+		},
+		"/api/v1/{lang}/{year}/search": {
+			"get": {
+				"operationId": "getApiV1ByLangByYearSearch",
+				"tags": [
+					"Nomenclature"
+				],
+				"summary": "Fuzzy search over goods codes and descriptions (top 50)",
+				"responses": {
+					"200": {
+						"description": "Matching codes.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"items": {
+											"type": "array",
+											"items": {
+												"$ref": "#/components/schemas/SearchHit"
+											}
+										}
+									},
+									"required": [
+										"items"
+									]
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Invalid path or query parameter.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Missing or invalid API key.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Unknown snapshot year.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Plan quota of AI units or lookups exceeded.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					}
+				},
+				"parameters": [
+					{
+						"in": "path",
+						"name": "lang",
+						"schema": {
+							"type": "string",
+							"enum": [
+								"de",
+								"en",
+								"fr"
+							]
+						},
+						"required": true,
+						"description": "Description language."
+					},
+					{
+						"in": "path",
+						"name": "year",
+						"schema": {
+							"type": "string",
+							"pattern": "^\\d{4}$",
+							"example": "2026"
+						},
+						"required": true,
+						"description": "Snapshot year, see `GET /snapshots`."
+					},
+					{
+						"in": "query",
+						"name": "q",
+						"schema": {
+							"type": "string",
+							"minLength": 1,
+							"maxLength": 200
+						},
+						"required": true
+					}
+				]
+			}
+		},
+		"/api/v1/{year}/duties/{goodsCode}": {
+			"get": {
+				"operationId": "getApiV1ByYearDutiesByGoodsCode",
+				"tags": [
+					"Duties"
+				],
+				"summary": "Import duties for a 10-digit goods code",
+				"responses": {
+					"200": {
+						"description": "Import measures.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"items": {
+											"type": "array",
+											"items": {
+												"$ref": "#/components/schemas/ImportDutyItem"
+											}
+										}
+									},
+									"required": [
+										"items"
+									]
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Invalid path or query parameter.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Missing or invalid API key.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Unknown snapshot year.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Plan quota of AI units or lookups exceeded.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					}
+				},
+				"parameters": [
+					{
+						"in": "path",
+						"name": "year",
+						"schema": {
+							"type": "string",
+							"pattern": "^\\d{4}$",
+							"example": "2026"
+						},
+						"required": true,
+						"description": "Snapshot year, see `GET /snapshots`."
+					},
+					{
+						"in": "path",
+						"name": "goodsCode",
+						"schema": {
+							"type": "string",
+							"pattern": "^\\d{10}$",
+							"example": "0101210000"
+						},
+						"required": true,
+						"description": "10-digit TARIC goods code."
+					}
+				]
+			}
+		},
+		"/api/v1/{lang}/{year}/codes/{goodsCode}": {
+			"get": {
+				"operationId": "getApiV1ByLangByYearCodesByGoodsCode",
+				"tags": [
+					"Nomenclature"
+				],
+				"summary": "One 10-digit goods code: description, ancestors, import duties and, for the latest year, signals",
+				"responses": {
+					"200": {
+						"description": "Code detail.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/CodeDetail"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Invalid path or query parameter.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Missing or invalid API key.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Unknown snapshot year.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Plan quota of AI units or lookups exceeded.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					}
+				},
+				"parameters": [
+					{
+						"in": "path",
+						"name": "lang",
+						"schema": {
+							"type": "string",
+							"enum": [
+								"de",
+								"en",
+								"fr"
+							]
+						},
+						"required": true,
+						"description": "Description language."
+					},
+					{
+						"in": "path",
+						"name": "year",
+						"schema": {
+							"type": "string",
+							"pattern": "^\\d{4}$",
+							"example": "2026"
+						},
+						"required": true,
+						"description": "Snapshot year, see `GET /snapshots`."
+					},
+					{
+						"in": "path",
+						"name": "goodsCode",
+						"schema": {
+							"type": "string",
+							"pattern": "^\\d{10}$",
+							"example": "0101210000"
+						},
+						"required": true,
+						"description": "10-digit TARIC goods code."
+					},
+					{
+						"in": "query",
+						"name": "history",
+						"schema": {
+							"type": "string",
+							"enum": [
+								"true",
+								"false"
+							]
+						},
+						"description": "Add the duties of every yearly snapshot."
+					}
+				]
+			}
+		},
+		"/api/v1/classify": {
+			"post": {
+				"operationId": "postApiV1Classify",
+				"tags": [
+					"Classification"
+				],
+				"summary": "Classify a product description into CN codes (latest snapshot)",
+				"description": "Rewrites the text into tariff wording, searches a vector index of every declarable code and reranks the candidates with an LLM. `fast` takes about 3-5 s and costs 1 AI unit; `accurate` takes 6-30 s, costs 5 and adds confidence and reasoning. If the rerank fails or times out, results come in vector order with `reranked: false`. Advisory only, see `disclaimer`.",
+				"responses": {
+					"200": {
+						"description": "Top 5 codes with import duties.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ClassifyResponse"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Invalid path or query parameter.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Missing or invalid API key.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Plan quota of AI units or lookups exceeded.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"503": {
+						"description": "Classification is not available in this environment.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					}
+				},
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ClassifyRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/classify/batch": {
+			"post": {
+				"operationId": "postApiV1ClassifyBatch",
+				"tags": [
+					"Classification"
+				],
+				"summary": "Classify up to 25 product descriptions in one call",
+				"description": "Same as `POST /classify` for each item, run four at a time. Costs the per-item AI units times the number of items, reserved up front: a batch that does not fit the remaining quota is refused as a whole. An item that fails has `error` set and still counts. Allow 30 s for a fast batch of 25 and 150 s for an accurate one.",
+				"responses": {
+					"200": {
+						"description": "One entry per item, in request order.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ClassifyBatchResponse"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Invalid path or query parameter.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Missing or invalid API key.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Plan quota of AI units or lookups exceeded.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"503": {
+						"description": "Classification is not available in this environment.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					}
+				},
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ClassifyBatchRequest"
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
