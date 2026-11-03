@@ -1,19 +1,72 @@
 [project]
 name = "hscode"
-version = "0.0.1"
-description = "EU customs tariff (TARIC) SDK for hscode.info: classify products into CN codes and read import duties. Coming soon."
+dynamic = ["version"]
+description = "HS code API client for Python: classify products into CN / TARIC codes and get EU import duties. Zero dependencies, typed."
 readme = "README.md"
 license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.9"
-keywords = ["hs code", "taric", "customs", "tariff", "cn code", "import duty"]
+authors = [{ name = "hscode.info" }]
+keywords = [
+  "hs code",
+  "hs code api",
+  "hs code classification",
+  "hs code lookup",
+  "taric",
+  "taric api",
+  "cn code",
+  "combined nomenclature",
+  "customs",
+  "customs tariff",
+  "customs duty",
+  "import duty",
+  "duty calculator",
+  "tariff",
+  "zolltarifnummer",
+  "bti",
+  "eu customs",
+  "pandas",
+  "sdk",
+  "api client",
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Internet :: WWW/HTTP",
+  "Topic :: Office/Business",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Typing :: Typed",
+]
 
 [project.urls]
 Homepage = "https://hscode.info/en/developers"
+Documentation = "https://hscode.info/api/v1/docs"
+Repository = "https://github.com/hscode-info/hscode"
+Issues = "https://github.com/hscode-info/hscode/issues"
 Pricing = "https://hscode.info/en/pricing"
+
+[dependency-groups]
+dev = ["pytest>=8"]
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[tool.hatch.version]
+path = "src/hscode/__init__.py"
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/hscode"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src", "tests", "README.md", "LICENSE"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
