@@ -7,7 +7,7 @@ EU customs tariff (TARIC) API, SDK and CLI: classify products into HS / CN / TAR
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![CI](https://github.com/hscode-info/hscode/actions/workflows/ci.yml/badge.svg)](https://github.com/hscode-info/hscode/actions/workflows/ci.yml)
 
-This is the open source client for [hscode.info](https://hscode.info), an HS code API and lookup for the EU Combined Nomenclature. Call the TARIC API from Node.js or TypeScript, from the shell, or from an AI agent over MCP.
+This is the open source client for [hscode.info](https://hscode.info), an HS code API and lookup for the EU Combined Nomenclature. Call the TARIC API from Node.js, TypeScript or Python, from the shell, or from an AI agent over MCP.
 
 ## Quick start
 
@@ -41,7 +41,7 @@ Browse codes by product on [hscode.info/en/hs-code](https://hscode.info/en/hs-co
 
 ```mermaid
 flowchart LR
-    A[Your code<br/>TypeScript SDK] -->|HTTPS + Bearer key| API
+    A[Your code<br/>TypeScript or Python SDK] -->|HTTPS + Bearer key| API
     B[Shell<br/>hscode CLI] -->|HTTPS + Bearer key| API
     C[AI agent<br/>MCP client] -->|MCP| M[hscode.info/mcp]
     D[AI agent in Chrome<br/>WebMCP] -->|same four tools| W[any hscode.info page]
@@ -55,7 +55,7 @@ flowchart LR
 | Package | Language | Install | Status |
 | --- | --- | --- | --- |
 | [`@hscode/sdk`](js/) | JavaScript / TypeScript, Node.js 20+ | `npm i @hscode/sdk` | 0.1.0 |
-| [`hscode`](python/) | Python | `pip install hscode` | Coming soon |
+| [`hscode`](python/) | Python 3.9+ | `pip install hscode` | 0.1.0 |
 
 ## CLI
 
@@ -105,6 +105,24 @@ try {
 ```
 
 The TypeScript SDK has no runtime dependencies. Types are generated from the [OpenAPI spec](openapi.json). Read the [package page](js/README.md) for every method.
+
+## Python SDK
+
+```python
+from hscode import Client, HscodeError
+
+client = Client()  # reads HSCODE_KEY
+
+result = client.classify("frozen shrimp, peeled", mode="accurate")
+duties = client.duties(result["results"][0]["goods_code"])
+
+try:
+    client.lookup("6109 10 00 10")
+except HscodeError as e:
+    print(e.status, e.code, e.message)
+```
+
+The Python SDK uses the standard library only and ships type hints. Read the [package page](python/README.md) for every method and a pandas example.
 
 ## MCP and WebMCP for AI agents
 

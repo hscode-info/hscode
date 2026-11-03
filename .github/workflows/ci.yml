@@ -40,3 +40,18 @@ jobs:
       - run: npm ci
       - run: npm run spec
       - run: git diff --exit-code
+
+  python:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.13']
+    defaults:
+      run:
+        working-directory: python
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv sync --python ${{ matrix.python-version }}
+      - run: uv run pytest
+      - run: uv build
