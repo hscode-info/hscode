@@ -121,6 +121,10 @@
 					},
 					"meas_type_code": {
 						"type": "string"
+					},
+					"additional_code": {
+						"type": "string",
+						"description": "TARIC additional code, e.g. the producer of an anti-dumping duty; empty when the measure has none."
 					}
 				},
 				"required": [
@@ -132,7 +136,8 @@
 					"duty",
 					"legal_base",
 					"measure_type",
-					"meas_type_code"
+					"meas_type_code",
+					"additional_code"
 				]
 			},
 			"CodeDetail": {
