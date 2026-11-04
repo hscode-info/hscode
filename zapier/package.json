@@ -5,8 +5,8 @@
   "license": "MIT",
   "main": "index.js",
   "private": true,
-  "scripts": { "test": "node --test test/app.test.js", "validate": "zapier validate" },
+  "scripts": { "test": "node --test test/app.test.js", "validate": "npx -y -p zapier-platform-cli@19.3.0 zapier-platform validate" },
   "engines": { "node": ">=18" },
-  "dependencies": { "zapier-platform-core": "19.2.1" },
-  "devDependencies": { "nock": "^13.5.0", "zapier-platform-cli": "19.2.1" }
+  "dependencies": { "zapier-platform-core": "19.3.0" },
+  "devDependencies": { "nock": "^13.5.0" }
 }
