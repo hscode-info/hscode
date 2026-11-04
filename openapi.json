@@ -31,7 +31,8 @@
 				"required": [
 					"year",
 					"month"
-				]
+				],
+				"additionalProperties": false
 			},
 			"ApiError": {
 				"type": "object",
@@ -46,7 +47,8 @@
 				"required": [
 					"error",
 					"message"
-				]
+				],
+				"additionalProperties": false
 			},
 			"NomenclatureItem": {
 				"type": "object",
@@ -71,7 +73,8 @@
 					"description",
 					"indent",
 					"hier_pos"
-				]
+				],
+				"additionalProperties": false
 			},
 			"SearchHit": {
 				"type": "object",
@@ -90,7 +93,8 @@
 				"required": [
 					"goods_code",
 					"description"
-				]
+				],
+				"additionalProperties": false
 			},
 			"ImportDutyItem": {
 				"type": "object",
@@ -138,7 +142,8 @@
 					"measure_type",
 					"meas_type_code",
 					"additional_code"
-				]
+				],
+				"additionalProperties": false
 			},
 			"CodeDetail": {
 				"type": "object",
@@ -188,7 +193,8 @@
 								"year",
 								"month",
 								"duties"
-							]
+							],
+							"additionalProperties": false
 						}
 					}
 				},
@@ -197,7 +203,8 @@
 					"description",
 					"hierarchy",
 					"duties"
-				]
+				],
+				"additionalProperties": false
 			},
 			"Signals": {
 				"type": "object",
@@ -243,7 +250,8 @@
 								"note",
 								"prefix",
 								"narrower"
-							]
+							],
+							"additionalProperties": false
 						},
 						"description": "Orientation only, check the act: EUDR, CBAM, dual-use (non-binding table) and Russia sanctions import/export bans."
 					},
@@ -303,7 +311,8 @@
 								"balance",
 								"last_import",
 								"state"
-							]
+							],
+							"additionalProperties": false
 						},
 						"description": "Tariff quotas that apply, with the balance at `quotas_as_of`."
 					},
@@ -342,7 +351,8 @@
 											"required": [
 												"country",
 												"imports_eur"
-											]
+											],
+											"additionalProperties": false
 										}
 									},
 									"cn8_codes": {
@@ -358,7 +368,8 @@
 									"exports_eur",
 									"origins",
 									"cn8_codes"
-								]
+								],
+								"additionalProperties": false
 							},
 							{
 								"type": "null"
@@ -402,7 +413,8 @@
 									"change",
 									"to",
 									"heading_deleted"
-								]
+								],
+								"additionalProperties": false
 							},
 							{
 								"type": "null"
@@ -422,6 +434,7 @@
 					"hs2028",
 					"rules_of_origin_url"
 				],
+				"additionalProperties": false,
 				"description": "Current data from the latest snapshot, set for the latest year only. Credit: European Commission, Eurostat."
 			},
 			"ClassifyResponse": {
@@ -481,13 +494,15 @@
 											"required": [
 												"label",
 												"goods_code"
-											]
+											],
+											"additionalProperties": false
 										}
 									}
 								},
 								"required": [
 									"options"
-								]
+								],
+								"additionalProperties": false
 							},
 							{
 								"type": "null"
@@ -508,7 +523,8 @@
 					"results",
 					"question",
 					"disclaimer"
-				]
+				],
+				"additionalProperties": false
 			},
 			"ClassifyResult": {
 				"type": "object",
@@ -561,7 +577,8 @@
 					"confidence",
 					"reasoning",
 					"duties"
-				]
+				],
+				"additionalProperties": false
 			},
 			"ClassifyRequest": {
 				"type": "object",
@@ -627,7 +644,8 @@
 					"mode",
 					"items",
 					"disclaimer"
-				]
+				],
+				"additionalProperties": false
 			},
 			"ClassifyBatchItem": {
 				"type": "object",
@@ -675,13 +693,15 @@
 											"required": [
 												"label",
 												"goods_code"
-											]
+											],
+											"additionalProperties": false
 										}
 									}
 								},
 								"required": [
 									"options"
-								]
+								],
+								"additionalProperties": false
 							},
 							{
 								"type": "null"
@@ -711,7 +731,8 @@
 					"question",
 					"id",
 					"error"
-				]
+				],
+				"additionalProperties": false
 			},
 			"ClassifyBatchRequest": {
 				"type": "object",
@@ -815,7 +836,8 @@
 										"langs",
 										"latest",
 										"snapshots"
-									]
+									],
+									"additionalProperties": false
 								}
 							}
 						}
@@ -867,7 +889,8 @@
 									},
 									"required": [
 										"items"
-									]
+									],
+									"additionalProperties": false
 								}
 							}
 						}
@@ -966,7 +989,8 @@
 									},
 									"required": [
 										"items"
-									]
+									],
+									"additionalProperties": false
 								}
 							}
 						}
@@ -1076,7 +1100,8 @@
 									},
 									"required": [
 										"items"
-									]
+									],
+									"additionalProperties": false
 								}
 							}
 						}
@@ -1185,7 +1210,8 @@
 									},
 									"required": [
 										"items"
-									]
+									],
+									"additionalProperties": false
 								}
 							}
 						}
