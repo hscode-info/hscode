@@ -180,6 +180,8 @@ export interface components {
             legal_base: string;
             measure_type: string;
             meas_type_code: string;
+            /** @description TARIC additional code, e.g. the producer of an anti-dumping duty; empty when the measure has none. */
+            additional_code: string;
         };
         CodeDetail: {
             goods_code: string;
