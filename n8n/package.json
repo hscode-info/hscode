@@ -1,0 +1,27 @@
+{
+  "name": "n8n-nodes-hscode",
+  "version": "0.1.0",
+  "description": "n8n community node for hscode.info: classify products into EU customs CN codes, look up codes and duties.",
+  "keywords": ["n8n-community-node-package", "hscode", "customs", "tariff", "taric", "cn-code"],
+  "license": "MIT",
+  "homepage": "https://hscode.info",
+  "author": { "name": "hscode.info" },
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc && node scripts/copy-assets.mjs",
+    "test": "npm run build && node --test test/code.test.mjs",
+    "prepublishOnly": "npm run build"
+  },
+  "files": ["dist"],
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "credentials": ["dist/credentials/HscodeApi.credentials.js"],
+    "nodes": ["dist/nodes/Hscode/Hscode.node.js"]
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "n8n-workflow": "^1.82.0",
+    "typescript": "^5.6.0"
+  },
+  "peerDependencies": { "n8n-workflow": "*" }
+}

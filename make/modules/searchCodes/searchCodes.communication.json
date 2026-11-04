@@ -1,0 +1,11 @@
+{
+  "url": "/{{ifempty(parameters.lang; \"en\")}}/{{ifempty(parameters.year; \"latest\")}}/search",
+  "method": "GET",
+  "qs": {
+    "q": "{{parameters.query}}"
+  },
+  "response": {
+    "iterate": "{{body.items}}",
+    "output": "{{item}}"
+  }
+}

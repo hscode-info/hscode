@@ -1,0 +1,7 @@
+{
+  "url": "/{{ifempty(parameters.lang; \"en\")}}/{{ifempty(parameters.year; \"latest\")}}/codes/{{replace(replace(parameters.code; \" \"; \"\"); \".\"; \"\")}}",
+  "method": "GET",
+  "response": {
+    "output": "{{body}}"
+  }
+}

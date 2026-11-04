@@ -1,0 +1,9 @@
+[
+  {
+    "name": "apiKey",
+    "type": "password",
+    "label": "API Key",
+    "required": true,
+    "help": "Create a key on your hscode.info account: https://hscode.info/en/account"
+  }
+]

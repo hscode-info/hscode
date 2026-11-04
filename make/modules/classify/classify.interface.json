@@ -1,0 +1,14 @@
+[
+  { "name": "snapshot", "type": "text", "label": "Snapshot" },
+  { "name": "mode", "type": "text", "label": "Mode" },
+  { "name": "results", "type": "array", "label": "Results", "spec": [
+    { "name": "goods_code", "type": "text", "label": "Goods Code" },
+    { "name": "description", "type": "text", "label": "Description" },
+    { "name": "path", "type": "array", "label": "Path", "spec": { "type": "text" } },
+    { "name": "score", "type": "number", "label": "Score" },
+    { "name": "confidence", "type": "number", "label": "Confidence" },
+    { "name": "reasoning", "type": "text", "label": "Reasoning" },
+    { "name": "duties", "type": "collection", "label": "Duties" }
+  ] },
+  { "name": "disclaimer", "type": "text", "label": "Disclaimer" }
+]

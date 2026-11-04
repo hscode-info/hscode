@@ -56,6 +56,14 @@ flowchart LR
 | --- | --- | --- | --- |
 | [`@hscode/sdk`](js/) | JavaScript / TypeScript, Node.js 20+ | `npm i @hscode/sdk` | 0.1.1 |
 | [`hscode`](python/) | Python 3.9+ | `pip install hscode` | 0.1.1 |
+| [`hscode/sdk`](php/) | PHP 8.1+, any PSR-18 client (Guzzle in Shopware, Magento, WooCommerce) | `composer require hscode/sdk` | 0.1.0, unreleased |
+| [`Hscode.Sdk`](dotnet/) | C# / .NET (netstandard2.0, net8.0) | `dotnet add package Hscode.Sdk` | 0.1.0, unreleased |
+| [`info.hscode:hscode-sdk`](java/) | Java 11+ | Maven / Gradle | 0.1.0, unreleased |
+| [Google Sheets](sheets/) | Apps Script custom functions | see folder | unreleased |
+| [Excel](excel/) | Office add-in custom functions | see folder | unreleased |
+| [`n8n-nodes-hscode`](n8n/) | n8n community node | n8n community nodes | 0.1.0, unreleased |
+| [Zapier](zapier/) | Zapier Platform app | see folder | unreleased |
+| [Make](make/) | Make custom app | see folder | unreleased |
 
 ## CLI
 
@@ -123,6 +131,44 @@ except HscodeError as e:
 ```
 
 The Python SDK uses the standard library only and ships type hints. Read the [package page](python/README.md) for every method and a pandas example.
+
+## PHP, C# and Java SDKs
+
+All three cover the same calls as the TypeScript and Python SDKs (classify, batch classify, lookup, history, search, duties, chapters, snapshots), read the key from `HSCODE_KEY`, use the `latest` year by default and raise an error with the HTTP status, the API error code and, on 429, `Retry-After` and the `RateLimit-*` headers.
+
+```php
+$client = new Hscode\Client();   // PHP 8.1+, reads HSCODE_KEY
+$code = $client->classify('cotton t-shirt')['results'][0]['goods_code'];
+```
+
+```csharp
+using var client = new HscodeClient();   // using Hscode; netstandard2.0 / net8.0, reads HSCODE_KEY
+var res = await client.ClassifyAsync("cotton t-shirt", Mode.Accurate);
+```
+
+```java
+HscodeClient client = HscodeClient.create();   // Java 11+, reads HSCODE_KEY
+String code = client.classify("cotton t-shirt").getResults().get(0).getGoodsCode();
+```
+
+Package pages: [php/](php/README.md), [dotnet/](dotnet/README.md), [java/](java/README.md).
+
+## Spreadsheets
+
+Classify products from a cell, one cell or a whole column:
+
+- Google Sheets: `=HSCODE("leather shoes, men")`, `=HSCODE_DESCRIPTION(B2)`, `=HSCODE_DUTY(B2, "CN")`, `=HSCODE_VALID(B2)`. See [sheets/](sheets/README.md).
+- Excel add-in: `=HSCODE.CODE(...)`, `=HSCODE.DESCRIPTION(...)`, `=HSCODE.DUTY(...)`, `=HSCODE.VALID(...)`. See [excel/](excel/README.md).
+
+Ranges go to the batch endpoint in groups of 25 and results are cached for 6 hours, so recalculating a sheet does not use quota again. Each user saves their own API key from the menu (Sheets) or the task pane (Excel).
+
+## No-code: n8n, Zapier, Make
+
+- [n8n](n8n/README.md): `n8n-nodes-hscode` community node with classify, batch classify, look up, search, duty history and validate.
+- [Zapier](zapier/README.md): Classify Product action, Look Up Code and Search Codes searches.
+- [Make](make/README.md): custom app with Classify Product, Look Up Code and Search Codes modules.
+
+Each connection asks for an API key and checks it with `GET /api/v1/snapshots`.
 
 ## MCP and WebMCP for AI agents
 

@@ -1,0 +1,8 @@
+{
+  "name": "lookupCode",
+  "label": "Look Up Code",
+  "description": "Gets description, hierarchy and duties of a 10-digit CN code.",
+  "connection": "hscode",
+  "moduleType": "action",
+  "actionCrud": "read"
+}

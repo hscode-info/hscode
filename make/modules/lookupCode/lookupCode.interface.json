@@ -1,0 +1,6 @@
+[
+  { "name": "goods_code", "type": "text", "label": "Goods Code" },
+  { "name": "description", "type": "text", "label": "Description" },
+  { "name": "hierarchy", "type": "array", "label": "Hierarchy", "spec": { "type": "collection" } },
+  { "name": "duties", "type": "collection", "label": "Duties" }
+]

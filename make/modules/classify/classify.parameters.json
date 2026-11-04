@@ -1,0 +1,12 @@
+[
+  { "name": "text", "type": "text", "label": "Product Description", "required": true, "help": "2 to 500 characters, any language." },
+  { "name": "mode", "type": "select", "label": "Mode", "default": "fast", "options": [
+    { "label": "Fast (1 AI unit)", "value": "fast" },
+    { "label": "Accurate (5 AI units)", "value": "accurate" }
+  ] },
+  { "name": "lang", "type": "select", "label": "Language", "default": "en", "options": [
+    { "label": "English", "value": "en" },
+    { "label": "German", "value": "de" },
+    { "label": "French", "value": "fr" }
+  ] }
+]

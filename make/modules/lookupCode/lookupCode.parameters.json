@@ -1,0 +1,9 @@
+[
+  { "name": "code", "type": "text", "label": "Code", "required": true, "help": "10 digits. Spaces and dots are removed." },
+  { "name": "year", "type": "text", "label": "Year", "default": "latest", "help": "Four-digit snapshot year or latest." },
+  { "name": "lang", "type": "select", "label": "Language", "default": "en", "options": [
+    { "label": "English", "value": "en" },
+    { "label": "German", "value": "de" },
+    { "label": "French", "value": "fr" }
+  ] }
+]

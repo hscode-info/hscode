@@ -1,0 +1,49 @@
+{
+  "allowCustomDataForDataTypeAny": true,
+  "functions": [
+    {
+      "id": "CODE",
+      "name": "CODE",
+      "description": "Best EU Combined Nomenclature (CN/TARIC) code for a product description. Accepts a range; rows are sent in batches of 25.",
+      "helpUrl": "https://hscode.info/en/developers",
+      "parameters": [
+        { "name": "text", "description": "Product description, or a range of descriptions. Any language.", "dimensionality": "matrix" },
+        { "name": "mode", "description": "Optional. \"fast\" (default, 1 unit) or \"accurate\" (5 units, slower).", "type": "string", "dimensionality": "scalar", "optional": true },
+        { "name": "lang", "description": "Optional. Language: \"en\" (default), \"de\" or \"fr\".", "type": "string", "dimensionality": "scalar", "optional": true }
+      ],
+      "result": { "dimensionality": "matrix" }
+    },
+    {
+      "id": "DESCRIPTION",
+      "name": "DESCRIPTION",
+      "description": "Official description of a CN/TARIC goods code.",
+      "helpUrl": "https://hscode.info/en/developers",
+      "parameters": [
+        { "name": "code", "description": "10-digit goods code (8-digit CN codes accepted), or a range of codes.", "dimensionality": "matrix" },
+        { "name": "lang", "description": "Optional. Language: \"en\" (default), \"de\" or \"fr\".", "type": "string", "dimensionality": "scalar", "optional": true }
+      ],
+      "result": { "dimensionality": "matrix" }
+    },
+    {
+      "id": "DUTY",
+      "name": "DUTY",
+      "description": "Import duty of a goods code: the third-country duty, or the duty listed for an origin. Advisory only.",
+      "helpUrl": "https://hscode.info/en/developers",
+      "parameters": [
+        { "name": "code", "description": "10-digit goods code, or a range of codes.", "dimensionality": "matrix" },
+        { "name": "origin", "description": "Optional. Country code such as \"CN\" or \"US\". Falls back to the third-country duty.", "type": "string", "dimensionality": "scalar", "optional": true }
+      ],
+      "result": { "dimensionality": "matrix" }
+    },
+    {
+      "id": "VALID",
+      "name": "VALID",
+      "description": "TRUE if the goods code exists in the latest EU tariff, FALSE if it is malformed or unknown.",
+      "helpUrl": "https://hscode.info/en/developers",
+      "parameters": [
+        { "name": "code", "description": "10-digit goods code, or a range of codes.", "dimensionality": "matrix" }
+      ],
+      "result": { "dimensionality": "matrix" }
+    }
+  ]
+}

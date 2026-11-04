@@ -1,0 +1,37 @@
+{
+    "name": "hscode/sdk",
+    "description": "PHP client for the hscode.info EU customs tariff API: classify products into HS / CN / TARIC codes and get import duties.",
+    "type": "library",
+    "license": "MIT",
+    "keywords": ["hs code", "customs", "tariff", "taric", "cn code", "import duty", "classification", "shopware", "magento", "woocommerce"],
+    "homepage": "https://hscode.info/en/developers",
+    "support": {
+        "source": "https://github.com/hscode-info/hscode",
+        "docs": "https://hscode.info/api/v1/docs"
+    },
+    "require": {
+        "php": ">=8.1",
+        "php-http/discovery": "^1.19",
+        "psr/http-client": "^1.0",
+        "psr/http-factory": "^1.0",
+        "psr/http-message": "^1.1 || ^2.0"
+    },
+    "require-dev": {
+        "nyholm/psr7": "^1.8",
+        "phpunit/phpunit": "^10.5 || ^11.0"
+    },
+    "autoload": {
+        "psr-4": { "Hscode\\": "src/" }
+    },
+    "autoload-dev": {
+        "psr-4": { "Hscode\\Tests\\": "tests/" }
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": { "php-http/discovery": true }
+    },
+    "scripts": {
+        "test": "phpunit"
+    },
+    "minimum-stability": "stable"
+}

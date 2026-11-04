@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HS Code</title>
+<script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+<style>
+	body { font: 14px/1.4 "Segoe UI", Arial, sans-serif; margin: 12px; color: #201f1e; }
+	input { width: 100%; box-sizing: border-box; padding: 6px; margin: 6px 0; }
+	button { padding: 6px 10px; margin-right: 6px; }
+	#msg { margin-top: 10px; min-height: 2em; }
+	.err { color: #a4262c; }
+	small { color: #605e5c; }
+</style>
+</head>
+<body>
+	<p>Paste your hscode.info API key. It is stored in this Office profile and never written into the workbook.</p>
+	<p><small>Get a key at <a href="https://hscode.info/en/account" target="_blank">hscode.info/en/account</a>.</small></p>
+	<div id="status">Checking...</div>
+	<input id="key" type="password" autocomplete="off" placeholder="API key">
+	<button id="save">Save</button>
+	<button id="test">Test</button>
+	<button id="clear">Remove</button>
+	<div id="msg"></div>
+	<script src="core.js"></script>
+	<script src="taskpane.js"></script>
+</body>
+</html>

@@ -167,6 +167,8 @@ export interface components {
         SearchHit: {
             goods_code: string;
             description: string;
+            /** @description Latest year only: the headings above the code, "Other" left out, e.g. "Shrimps and prawns › Frozen". */
+            context?: string;
         };
         ImportDutyItem: {
             goods_code: string;
