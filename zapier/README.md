@@ -17,7 +17,7 @@ The auth test calls `GET /api/v1/snapshots`. It spends no AI units (one lookup) 
 ```bash
 npm install
 npm test                # nock-based, no network
-npx zapier-platform validate   # local schema checks, no login
+npm run validate        # local schema checks, no login
 ```
 
 ## Publish
@@ -25,11 +25,11 @@ npx zapier-platform validate   # local schema checks, no login
 Account needed: a Zapier developer account (free).
 
 ```bash
-npx zapier-platform login
-npx zapier-platform register "hscode.info"
-npx zapier-platform push
-npx zapier-platform invite you@example.com     # private testing
-npx zapier-platform promote 0.1.0              # needs Zapier review for public listing
+npx -p zapier-platform-cli zapier-platform login
+npx -p zapier-platform-cli zapier-platform register "hscode.info"
+npx -p zapier-platform-cli zapier-platform push
+npx -p zapier-platform-cli zapier-platform invite you@example.com     # private testing
+npx -p zapier-platform-cli zapier-platform promote 0.1.0              # needs Zapier review for public listing
 ```
 
 Public listing needs an icon (256x256 PNG), a description and a review by Zapier.
